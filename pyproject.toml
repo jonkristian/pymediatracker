@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "pymediatracker"
+version = "0.1.0"
+description = "Asynchronous python client for MediaTracker."
+authors = ["Jon Kristian Nilsen <hello@jonkristian.no>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/jonkristian/pymediatracker"
+repository = "https://github.com/jonkristian/pymediatracker"
+documentation = "https://github.com/jonkristian/pymediatracker"
+keywords = ["mediatracker", "api", "async", "client"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+aiohttp = "^3.7.4"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+flake8 = "^3.9.2"
+black = { version = "^21.6b0", allow-prereleases = true }
+
+[build-system]
+requires = ["setuptools", "poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
