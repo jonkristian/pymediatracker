@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pymediatracker"
-version = "0.1.0"
+version = "0.1.1"
 description = "Asynchronous python client for MediaTracker."
 authors = ["Jon Kristian Nilsen <hello@jonkristian.no>"]
 license = "MIT"

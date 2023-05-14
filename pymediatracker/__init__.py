@@ -22,8 +22,11 @@ class MediaTracker(MediaTrackerBase):
         self._host = host
         self._token = token
         self._config = MediaTrackerConfig
-        self._items: List[MediaTrackerItem] = []
-        self._calendar: List[MediaTrackerCalendar] = []
+        self._item: List[MediaTrackerItem] = []
+        self._item_dict: dict = {}
+        self._calendar_items: List[MediaTrackerCalendar] = []
+        self._calendar_items_dict: dict = {}
+
         self._entities = [
             {
                 "key": "audiobook",
@@ -56,12 +59,16 @@ class MediaTracker(MediaTrackerBase):
         return self._token
 
     @property
-    def items(self) -> List[MediaTrackerItem]:
-        return self._items
+    def item(self) -> List[MediaTrackerItem]:
+        return self._item
 
     @property
-    def calendar(self) -> List[MediaTrackerCalendar]:
-        return self._calendar
+    def calendar_items(self) -> List[MediaTrackerCalendar]:
+        return self._calendar_items
+
+    @property
+    def calendar_items_dict(self) -> dict:
+        return self._calendar_items_dict
 
     @property
     def config(self) -> dict:
@@ -72,17 +79,15 @@ class MediaTracker(MediaTrackerBase):
         return self._entities
 
     async def fetch(self) -> None:
-        """Fetch data from MediaTracker."""
+        """Fetch some basic data from MediaTracker."""
         data: dict = {}
         data["config"] = await self.get_config()
-        data["items"] = await self.get_items()
         data["entities"] = self.entities
-        data["calendar"] = self.calendar
 
         return data
 
     async def get_config(self) -> MediaTrackerConfig:
-        """Get Config."""
+        """Get MediaTracker Configuration."""
         response: ClientResponse = await self._client.get(
             f"http://{self._host}/api/configuration?token={self._token}"
         )
@@ -92,28 +97,30 @@ class MediaTracker(MediaTrackerBase):
 
         return config
 
-    async def get_items(self) -> MediaTrackerItem:
-        """Get Items."""
+
+    async def get_calendar_items(self, start, end) -> MediaTrackerCalendar:
+        """Get MediaTracker Calendar Items from Date Range."""
         response: ClientResponse = await self._client.get(
-            f"http://{self._host}/api/items?token={self._token}"
+            f"http://{self._host}/api/calendar?start={start}&end={end}&token={self._token}"
         )
         json = await response.json()
         self.logger.debug(json)
 
-        self._items = [MediaTrackerItem(self._client, item) for item in json or []]
-        self._items_dict: dict = {}
-        for item in self._items:
-            self._items_dict[item.id] = item
+        self._calendar_items = [
+            MediaTrackerCalendar(self._client, calendar_item) for calendar_item in json or []
+        ]
 
-    async def get_by_media_type(self, media_type) -> MediaTrackerItem:
-        """Get Media."""
+        return self._calendar_items
+
+
+    async def get_item(self, id) -> MediaTrackerItem:
+        """Get Item."""
         response: ClientResponse = await self._client.get(
-            f"http://{self._host}/api/items?mediaType={media_type}&token={self._token}"
+            f"http://{self._host}/api/details/{id}?token={self._token}"
         )
         json = await response.json()
         self.logger.debug(json)
 
-        self._items = [MediaTrackerItem(self._client, item) for item in json or []]
-        self._items_dict: dict = {}
-        for item in self._items:
-            self._items_dict[item.id] = item
+        self._item = MediaTrackerItem(self._client, json)
+
+        return self._item
